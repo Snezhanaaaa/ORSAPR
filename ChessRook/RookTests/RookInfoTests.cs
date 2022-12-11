@@ -117,9 +117,20 @@ namespace RookTests
             bool expected = true;
             var rook = new RookInfo();
 
-            rook.HasFillet = expected;
+            rook.HasNewFeatures = expected;
 
-            Assert.AreEqual(expected, rook.HasFillet);
+            Assert.AreEqual(expected, rook.HasNewFeatures);
+        }
+
+        [Test(Description = "Тест сеттера класса RookInfo свойства HasFillet")]
+        public void SetHasFeatures_Setted()
+        {
+            bool expected = true;
+            var rook = new RookInfo();
+
+            rook.HasAnotherFeatures = expected;
+
+            Assert.AreEqual(expected, rook.HasAnotherFeatures);
         }
 
         [Test(Description = "Тест метода Validation класса RookInfo. Он должен вернуть true")]

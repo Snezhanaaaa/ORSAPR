@@ -31,6 +31,11 @@ namespace KompasApi
         public ksPart Part;
 
         /// <summary>
+        /// Свойство возвращающее объект интерфейса API
+        /// </summary>
+        public KompasObject Object => _kompasObject;
+
+        /// <summary>
         /// Открытие КОМПАС 3Д
         /// </summary>
         public void OpenKompas3D()
@@ -77,7 +82,7 @@ namespace KompasApi
         /// <summary>
         /// Конструктор
         /// </summary>
-        public KompasConnector() 
+        public KompasConnector()
         {
             OpenKompas3D();
         }

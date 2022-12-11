@@ -1,4 +1,5 @@
 ﻿using Kompas6API5;
+using Kompas6Constants;
 using Kompas6Constants3D;
 using Rook;
 
@@ -18,11 +19,6 @@ namespace KompasApi
         /// Объект Point
         /// </summary>
         private Point _point;
-        
-        /// <summary>
-        /// Конструктор
-        /// </summary>
-        public ModelCreator() { }
 
         /// <summary>
         /// Создание документа
@@ -46,11 +42,11 @@ namespace KompasApi
         /// <param name="y">Координата y</param>
         private void DrawLine(int x, int y)
         {
-            _kompas.Document2D.ksLineSeg(_point.X, _point.Y, _point.X + x, _point.Y+y, 1);
+            _kompas.Document2D.ksLineSeg(_point.X, _point.Y, _point.X + x, _point.Y + y, 1);
             _point.X += x;
             _point.Y += y;
         }
-        
+
         /// <summary>
         /// Создание модели ладьи
         /// </summary>
@@ -60,19 +56,8 @@ namespace KompasApi
             CreateDocument();
             _point = new Point();
             CreateBase(rookInfo);
-            CreateBattlement(rookInfo.UpperBaseHeight,rookInfo.UpperBaseDiameter);
-            if (rookInfo.HasFillet)
-            {
-                //фаска на нижнем основании
-                var x = 0;
-                var y = (rookInfo.FullHeight - rookInfo.UpperBaseHeight - rookInfo.LowerBaseHeight);
-                var z = rookInfo.LowerBaseDiameter / 2;
-                CreateFillet(1, x, y, z);
-                //на верхнем основании
-                y = rookInfo.UpperBaseHeight;
-                z = rookInfo.UpperBaseDiameter / 2;
-                CreateFillet(1, x, y, z);
-            }
+            CreateBattlement(rookInfo.UpperBaseHeight, rookInfo.UpperBaseDiameter,
+                rookInfo.HasAnotherFeatures);
             _kompas.Document3D.drawMode = (int)ViewMode.vm_Shaded;
             _kompas.Document3D.shadedWireframe = true;
         }
@@ -118,6 +103,22 @@ namespace KompasApi
             sketchDefinition.EndEdit();
 
             Rotate(sketch);
+
+
+            if (rookInfo.HasNewFeatures)
+            {
+                var baseSketch = CreateSketch(Obj3dType.o3d_planeXOZ,
+                CreateOffsetPlane(Obj3dType.o3d_planeXOZ,
+                -(rookInfo.FullHeight - rookInfo.UpperBaseHeight)));
+                _kompas.Document2D = (ksDocument2D)baseSketch.BeginEdit();
+
+                _kompas.Document2D.ksRectangle(DrawRectangle(-rookInfo.LowerBaseDiameter / 2,
+                    -rookInfo.LowerBaseDiameter / 2, (rookInfo.LowerBaseDiameter / 2) * 2,
+                    (rookInfo.LowerBaseDiameter / 2) * 2, 0), 0);
+
+                baseSketch.EndEdit();
+                Extrude(baseSketch, rookInfo.LowerBaseHeight);
+            }
         }
 
         /// <summary>
@@ -125,7 +126,7 @@ namespace KompasApi
         /// </summary>
         /// <param name="upperBaseHeight">Высота верхнего основания</param>
         /// <param name="upperBaseDiameter">Диаметр верхнего основания</param>
-        private void CreateBattlement(int upperBaseHeight,int upperBaseDiameter)
+        private void CreateBattlement(int upperBaseHeight, int upperBaseDiameter, bool hasAnotherFeatures)
         {
             ksEntity battlePlane = _kompas.Part.GetDefaultEntity((short)Obj3dType.o3d_planeXOZ);
             ksEntity battleSketch = _kompas.Part.NewEntity((short)Obj3dType.o3d_sketch);
@@ -140,10 +141,96 @@ namespace KompasApi
             var center = new Point();
 
             _kompas.Document2D.ksCircle(center.X, center.X, upperBaseDiameter / 2, 1);
-            _kompas.Document2D.ksCircle(center.X, center.X, upperBaseDiameter / 2.2, 1); 
+            _kompas.Document2D.ksCircle(center.X, center.X, upperBaseDiameter / 2.2, 1);
 
             battleSketchDefinition.EndEdit();
-            Extrude(battleSketch, upperBaseHeight);
+            Extrude(battleSketchDefinition, upperBaseHeight);
+
+
+            if (hasAnotherFeatures)
+            {
+                var sketch = CreateSketch(Obj3dType.o3d_planeXOZ,
+                CreateOffsetPlane(Obj3dType.o3d_planeXOZ, upperBaseHeight / 2));
+                _kompas.Document2D = (ksDocument2D)sketch.BeginEdit();
+
+                _kompas.Document2D.ksRectangle(DrawRectangle(-upperBaseDiameter / 2,
+                    -upperBaseDiameter / 16, upperBaseDiameter / 8, upperBaseDiameter, 0), 0);
+
+
+                _kompas.Document2D.ksRectangle(DrawRectangle(-upperBaseDiameter / 16,
+                    -upperBaseDiameter / 2, upperBaseDiameter, upperBaseDiameter / 8, 0), 0);
+
+                sketch.EndEdit();
+                СreateCutExtrusion(sketch, upperBaseHeight / 2);
+            }
+        }
+
+        /// <summary>
+        /// Выдавливание вращением
+        /// </summary>
+        /// <param name="sketch"> эскиз</param>
+        private void Rotate(ksEntity sketch)
+        {
+            //интерфейс объекта "операция выдавливания вращением"
+            ksEntity rotatedEntity =
+                (ksEntity)_kompas.Part.NewEntity((short)Obj3dType.o3d_baseRotated);
+
+            //интерфейс параметров операции  "выдавливание вращением"
+            ksBaseRotatedDefinition rotateDefinition =
+                (ksBaseRotatedDefinition)rotatedEntity.GetDefinition();
+            rotateDefinition.directionType = (short)Direction_Type.dtBoth;
+            rotateDefinition.SetSideParam(true, 360);
+            rotateDefinition.SetSketch(sketch);
+            rotatedEntity.Create();
+        }
+
+        /// <summary>
+        /// Метод рисования прямоугольника
+        /// </summary>
+        /// <param name="x">X базовой точки</param>
+        /// <param name="y">Y базовой точки</param>
+        /// <param name="height">Высота</param>
+        /// <param name="width">Ширина</param>
+        /// <returns>Переменная с параметрами прямоугольника</returns>
+        private ksRectangleParam DrawRectangle(double x, double y,
+            double height, double width, double ang)
+        {
+            var rectangleParam =
+                (ksRectangleParam)_kompas.Object.GetParamStruct
+                    ((short)StructType2DEnum.ko_RectangleParam);
+            rectangleParam.x = x;
+            rectangleParam.y = y;
+            rectangleParam.height = height;
+            rectangleParam.width = width;
+            rectangleParam.ang = ang;
+            rectangleParam.style = 1;
+            return rectangleParam;
+        }
+
+
+        /// <summary>
+        /// Метод осуществляющий вырезание
+        /// </summary>
+        /// <param name="sketch">Эскиз</param>
+        /// <param name="depth">Расстояние выреза</param>
+        private void СreateCutExtrusion(ksSketchDefinition sketch,
+            double depth, bool side = true)
+        {
+            var cutExtrusionEntity = (ksEntity)_kompas.Part.NewEntity(
+                (short)ksObj3dTypeEnum.o3d_cutExtrusion);
+            var cutExtrusionDef =
+                (ksCutExtrusionDefinition)cutExtrusionEntity
+                    .GetDefinition();
+
+            cutExtrusionDef.SetSideParam(side,
+                (short)End_Type.etBlind, depth);
+            cutExtrusionDef.directionType = side ?
+                (short)Direction_Type.dtNormal :
+                (short)Direction_Type.dtReverse;
+            cutExtrusionDef.cut = true;
+            cutExtrusionDef.SetSketch(sketch);
+
+            cutExtrusionEntity.Create();
         }
 
         /// <summary>
@@ -151,7 +238,7 @@ namespace KompasApi
         /// </summary>
         /// <param name="sketch"> эскиз </param>
         /// <param name="upperBaseHeight"> высота верхнего основания </param>
-        private void Extrude(ksEntity sketch, int upperBaseHeight)
+        private void Extrude(ksSketchDefinition sketch, int upperBaseHeight)
         {
             int depth = upperBaseHeight;
             var extrudeEntity = (ksEntity)_kompas.Part
@@ -182,46 +269,53 @@ namespace KompasApi
             extrudeEntity.Create();
         }
 
-        /// <summary>
-        /// Выдавливание вращением
-        /// </summary>
-        /// <param name="sketch"> эскиз</param>
-        private void Rotate(ksEntity sketch)
-        {
-            //интерфейс объекта "операция выдавливания вращением"
-            ksEntity rotatedEntity = 
-                (ksEntity)_kompas.Part.NewEntity((short)Obj3dType.o3d_baseRotated);
 
-            //интерфейс параметров операции  "выдавливание вращением"
-            ksBaseRotatedDefinition rotateDefinition = 
-                (ksBaseRotatedDefinition)rotatedEntity.GetDefinition();
-            rotateDefinition.directionType = (short)Direction_Type.dtBoth;
-            rotateDefinition.SetSideParam(true, 360);
-            rotateDefinition.SetSketch(sketch);
-            rotatedEntity.Create();
+        /// <summary>
+        /// Метод смещающий плоскость
+        /// </summary>
+        /// <param name="plane">Плоскость</param>
+        /// <param name="offset">Расстояние смещения</param>
+        /// <returns>Объект смещения</returns>
+        private ksEntity CreateOffsetPlane(Obj3dType plane, double offset)
+        {
+            var offsetEntity = (ksEntity)_kompas
+                .Part.NewEntity((short)Obj3dType.o3d_planeOffset);
+            var offsetDef = (ksPlaneOffsetDefinition)offsetEntity
+                .GetDefinition();
+            offsetDef.SetPlane((ksEntity)_kompas
+                .Part.NewEntity((short)plane));
+            offsetDef.offset = offset;
+            offsetDef.direction = false;
+            offsetEntity.Create();
+            return offsetEntity;
         }
 
         /// <summary>
-        /// Создание фаски на выбранном ребре
+        /// Метод создающий эскиз
         /// </summary>
-        /// <param name="radiusCrossTie">Радиус</param>
-        /// <param name="x">X-координата точки на ребре</param>
-        /// <param name="y">Y-координата точки на ребре</param>
-        /// <param name="z">Z-координата точки на ребре</param>
-        private void CreateFillet(int radiusCrossTie, int x,
-            int y, int z)
+        /// <param name="planeType">Плоскость</param>
+        /// <param name="offsetPlane">Объект смещения</param>
+        /// <returns>Эскиз</returns>
+        private ksSketchDefinition CreateSketch(Obj3dType planeType,
+            ksEntity offsetPlane)
         {
-            var filletEntity = (ksEntity)_kompas.Part.NewEntity((short)Obj3dType.o3d_fillet);
-            var filletDef = (ksFilletDefinition)filletEntity.GetDefinition();
-            filletDef.radius = radiusCrossTie;
-            filletDef.tangent = true;
-            ksEntityCollection iArray = filletDef.array();
-            ksEntityCollection iCollection = _kompas.Part.EntityCollection((short)Obj3dType.o3d_edge);
+            var plane = (ksEntity)_kompas.Part
+                .GetDefaultEntity((short)planeType);
 
-            iCollection.SelectByPoint(x, y, z);
-            var iEdge = iCollection.Last();
-            iArray.Add(iEdge);
-            filletEntity.Create();
+            var sketch = (ksEntity)_kompas.Part.
+                NewEntity((short)Obj3dType.o3d_sketch);
+            var ksSketch = (ksSketchDefinition)sketch.GetDefinition();
+
+            if (offsetPlane != null)
+            {
+                ksSketch.SetPlane(offsetPlane);
+                sketch.Create();
+                return ksSketch;
+            }
+
+            ksSketch.SetPlane(plane);
+            sketch.Create();
+            return ksSketch;
         }
     }
 }

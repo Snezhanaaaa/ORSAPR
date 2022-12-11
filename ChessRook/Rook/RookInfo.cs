@@ -10,7 +10,7 @@ namespace Rook
         /// <summary>
         /// минимальная полная высота ладьи
         /// </summary>
-        public readonly int FULL_HEIGHT_MIN = 15;
+        public readonly int FULL_HEIGHT_MIN = 70;
 
         /// <summary>
         /// максимальная полная высота ладьи
@@ -20,7 +20,7 @@ namespace Rook
         /// <summary>
         /// минимальная высота верхнего основания
         /// </summary>
-        public readonly int UPPER_BASE_HEIGHT_MIN = 4;
+        public readonly int UPPER_BASE_HEIGHT_MIN = 14;
 
         /// <summary>
         /// максимальная высота верхнего основания
@@ -30,7 +30,7 @@ namespace Rook
         /// <summary>
         /// минимальная высота нижнего основания
         /// </summary>
-        public readonly int LOWER_BASE_HEIGHT_MIN = 5;
+        public readonly int LOWER_BASE_HEIGHT_MIN = 15;
 
         /// <summary>
         /// максимальная высота нижнего основания
@@ -40,17 +40,17 @@ namespace Rook
         /// <summary>
         /// минимальный диаметр нижнего основания
         /// </summary>
-        public readonly int LOWER_BASE_DIAMETER_MIN = 5;
+        public readonly int LOWER_BASE_DIAMETER_MIN = 20;
 
         /// <summary>
         /// максимальный диаметр нижнего основания
         /// </summary>
-        public readonly int LOWER_BASE_DIAMETER_MAX = 500;
+        public readonly int LOWER_BASE_DIAMETER_MAX = 200;
 
         /// <summary>
         /// минимальный диаметр верхнего основания
         /// </summary>
-        public readonly int UPPER_BASE_DIAMETER_MIN = 3;
+        public readonly int UPPER_BASE_DIAMETER_MIN = 15;
 
         /// <summary>
         /// максимальный диаметр верхнего основания
@@ -174,7 +174,8 @@ namespace Rook
         /// <summary>
         /// Скруглять ли грани ладьи
         /// </summary>
-        public bool HasFillet { get; set; }
+        public bool HasNewFeatures { get; set; }
+        public bool HasAnotherFeatures { get; set; }
 
         /// <summary>
         /// Конструктор

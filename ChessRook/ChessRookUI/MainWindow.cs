@@ -258,7 +258,7 @@ namespace ChessRookUI
                 UpperBaseDiameter = int.Parse(upperDiameterTextBox.Text),
                 LowerBaseHeight = int.Parse(lowerHeightTextBox.Text),
                 UpperBaseHeight = int.Parse(upperHeightTextBox.Text),
-                HasFillet = filletCheckBox.Checked
+                HasFillet = newFeaturesCheckBox.Checked
             };
 
             _modelCreator.CreateRook(_rookInfo);    

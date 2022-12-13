@@ -9,7 +9,7 @@ namespace RookTests
         [Test(Description ="Тест геттера и сеттера класса RookInfo свойства FullHeight")]
         public void GetFullHeight_ResultCorrect()
         {
-            var expected = 20;
+            var expected = 70;
             var rook = new RookInfo { FullHeight = expected };
 
             Assert.AreEqual(expected, rook.FullHeight);
@@ -18,7 +18,7 @@ namespace RookTests
         [Test(Description = "Тест геттера и сеттера класса RookInfo свойства UpperBaseHeight")]
         public void GetUpperBaseHeight_ResultCorrect()
         {
-            var expected = 10;
+            var expected = 30;
             var rook = new RookInfo { UpperBaseHeight = expected };
 
             Assert.AreEqual(expected, rook.UpperBaseHeight);
@@ -27,7 +27,7 @@ namespace RookTests
         [Test(Description = "Тест геттера и сеттера класса RookInfo свойства LowerBaseHeight")]
         public void GetLowerBaseHeight_ResultCorrect()
         {
-            var expected = 10;
+            var expected = 20;
             var rook = new RookInfo { LowerBaseHeight = expected };
 
             Assert.AreEqual(expected, rook.LowerBaseHeight);
@@ -36,7 +36,7 @@ namespace RookTests
         [Test(Description = "Тест геттера и сеттера класса RookInfo свойства LowerBaseDiameter")]
         public void GetLowerBaseDiameter_ResultCorrect()
         {
-            var expected = 10;
+            var expected = 20;
             var rook = new RookInfo { LowerBaseDiameter = expected };
 
             Assert.AreEqual(expected, rook.LowerBaseDiameter);
@@ -45,7 +45,7 @@ namespace RookTests
         [Test(Description = "Тест геттера и сеттера класса RookInfo свойства UpperBaseDiameter")]
         public void GetUpperBaseDiameter_ResultCorrect()
         {
-            var expected = 10;
+            var expected = 20;
             var rook = new RookInfo { UpperBaseDiameter = expected };
 
             Assert.AreEqual(expected, rook.UpperBaseDiameter);
@@ -111,8 +111,8 @@ namespace RookTests
             Assert.AreEqual(expected, rook.UpperBaseDiameter);
         }
 
-        [Test(Description = "Тест сеттера класса RookInfo свойства HasFillet")]
-        public void SetHasFillet_Setted()
+        [Test(Description = "Тест сеттера класса RookInfo свойства HasNewFeatures")]
+        public void SetHasNewFeatures_Setted()
         {
             bool expected = true;
             var rook = new RookInfo();
@@ -122,8 +122,8 @@ namespace RookTests
             Assert.AreEqual(expected, rook.HasNewFeatures);
         }
 
-        [Test(Description = "Тест сеттера класса RookInfo свойства HasFillet")]
-        public void SetHasFeatures_Setted()
+        [Test(Description = "Тест сеттера класса RookInfo свойства HasAnotherFeatures")]
+        public void SetHasAnotherFeatures_Setted()
         {
             bool expected = true;
             var rook = new RookInfo();

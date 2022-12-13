@@ -161,7 +161,7 @@ namespace KompasApi
                     -upperBaseDiameter / 2, upperBaseDiameter, upperBaseDiameter / 8, 0), 0);
 
                 sketch.EndEdit();
-                СreateCutExtrusion(sketch, upperBaseHeight / 2);
+                СreateCutExtrusion(sketch, upperBaseHeight);
             }
         }
 

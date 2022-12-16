@@ -23,7 +23,7 @@ namespace ChessRookUI
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainWindow());
-            StressTest();
+            //StressTest();
         }
             public static void StressTest()
             {

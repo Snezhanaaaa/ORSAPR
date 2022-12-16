@@ -1,10 +1,12 @@
 ﻿using KompasApi;
+using Microsoft.VisualBasic.Devices;
 using Rook;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
